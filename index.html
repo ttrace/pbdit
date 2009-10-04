@@ -1,0 +1,37 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>pbedit</title>
+	<link rel="stylesheet" href="pbapp.css">
+	<script>
+	</script>
+	<script src="scripts/pbedit.js" type="application/javascript" charset="utf-8"></script>
+	<script src="scripts/canvas.js" type="application/javascript" charset="utf-8"></script>
+	<script src="scripts/utils.js" type="application/javascript" charset="utf-8"></script>
+	<script src="scripts/widget.js" type="application/javascript" charset="utf-8"></script>
+</head>
+
+<body onload="init_pbtweet()">
+	<header>
+	</header>
+
+	<div id = "workspace_wrapper">
+		<canvas id = "workspace" width = "400" height = "300" >
+		</canvas>
+	</div>
+	
+	<footer>
+		<ul id = "toolbar">
+			<li>
+				<a href="javascript:blur()" target="_blank">blur</a>
+			</li>
+			<li style="margin-left: 30px;">
+				URL: <input name="image_drop" id="image_drop" type="text" accept="image" onchange="load_image_from_disk(this)" style="color:black;width:300px;">
+			</li>
+			<li>
+				<input id="scale_slider" name="scale_slider" type="range" min="1" max="10" value="0" onchange="image_scale(this)">
+			</li>
+
+		</ul>
+	</footer>
+</html>
