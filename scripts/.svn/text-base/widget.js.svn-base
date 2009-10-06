@@ -14,4 +14,3 @@ Widget.prototype = {
 // widget features
 Widget.prototype = {
 }
-

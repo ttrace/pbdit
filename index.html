@@ -1,17 +1,18 @@
-<!DOCTYPE HTML>
+﻿<!DOCTYPE HTML>
 <html>
 <head>
 	<title>pbedit</title>
 	<link rel="stylesheet" href="pbapp.css">
 	<script>
 	</script>
+	<script src="scripts/ui.js" type="application/javascript" charset="utf-8"></script>
+	<script src="scripts/utils.js" type="application/javascript" charset="utf-8"></script>
 	<script src="scripts/pbedit.js" type="application/javascript" charset="utf-8"></script>
 	<script src="scripts/canvas.js" type="application/javascript" charset="utf-8"></script>
-	<script src="scripts/utils.js" type="application/javascript" charset="utf-8"></script>
 	<script src="scripts/widget.js" type="application/javascript" charset="utf-8"></script>
 </head>
 
-<body onload="init_pbtweet()">
+<body onload="init_pbtweet()" onpaste="load_clipboard(event)" onbeforepaste="pre_paste(event)">
 	<header>
 	</header>
 
@@ -20,16 +21,19 @@
 		</canvas>
 	</div>
 	
+	<div id = "layer">..
+		<div class = thumbnail>
+			<div contenteditable = "true" id = "preview" style="">no image..</div>
+		</div>
+	</div>
+	
 	<footer>
 		<ul id = "toolbar">
 			<li>
 				<a href="javascript:blur()" target="_blank">blur</a>
 			</li>
-			<li style="margin-left: 30px;">
-				URL: <input name="image_drop" id="image_drop" type="text" accept="image" onchange="load_image_from_disk(this)" style="color:black;width:300px;">
-			</li>
-			<li>
-				<input id="scale_slider" name="scale_slider" type="range" min="1" max="10" value="0" onchange="image_scale(this)">
+			<li id = "scale_slider_group">
+				Zoom: out <input id="scale_slider" name="scale_slider" type="range" min="1" max="10" value="0" onchange="image_scale(this)" style="vertical-align : top;"> in
 			</li>
 
 		</ul>

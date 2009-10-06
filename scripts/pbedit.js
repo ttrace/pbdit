@@ -1,24 +1,33 @@
-function init_pbtweet()
+﻿function init_pbtweet()
 {
+	//database initialize
+	database_version = "1.0";
+	development = "trur";
+	init_web_database();
+
 	//window.console.log('initialize');
 	// Event dispatch.
 	window.addEventListener ( 'resize' , function(){ window_resize() } , true);
 
 	// initialize window size.
-
 	// window resized event
-		window_resize();
+	window_resize();
 
-	// workspace Image
-	
+	// add mutation event on Thumbnail box
+	document.getElementById("preview").addEventListener( "DOMNodeInserted" ,
+		function(e)
+		{
+			thumbnail_builder(e);
+		}
+		, false );
 }
 
-function load_image_from_disk( input_form )
+function load_image_on_canvas( src )
 {
 	var workspace_wrapper = document.getElementById('workspace_wrapper');
 
 	var workspace_image = new Image();
-		workspace_image.src = input_form.value;
+		workspace_image.src = src;
 		
 	var image_layer = new myCanvas();
 		image_layer.image = workspace_image;
@@ -30,58 +39,132 @@ function load_image_from_disk( input_form )
 	//workspace scaling
 	var height_ratio = workspace_wrapper.offsetHeight / workspace_image.height;
 	var width_ratio = workspace_wrapper.offsetWidth / workspace_image.width;
-	//window.console.log( height_ratio , width_ratio );
 
 	//image initial scaling	
 	var workspace_scale = Math.min( height_ratio , width_ratio )
 		workspace.style.height = parseInt( workspace_image.height * workspace_scale - 5) + "px";
 		workspace.style.width = parseInt( workspace_image.width * workspace_scale -5) + "px";
-	//window.console.log(workspace_scale, workspace.offsetWidth, workspace.offsetHeight);
 
 	//scale slider initial set
 	var height_ratio_for_slider = workspace_image.height / workspace_wrapper.offsetHeight;
 	var width_ratio_for_slider = workspace_image.width / workspace_wrapper.offsetWidth;
-	//window.console.log( height_ratio_for_slider , width_ratio_for_slider );
 
 	//image initial scaling	
 	var slider_scale = Math.min( height_ratio_for_slider , width_ratio_for_slider )
-	//window.console.log( slider_scale , height_ratio_for_slider , width_ratio_for_slider);
 	
 	var scale_slider = document.getElementById('scale_slider');
 	scale_slider.image_max = slider_scale;
 	
 	ctx = workspace.getContext('2d');
 	ctx.drawImage(workspace_image, 0, 0, workspace.width, workspace.height);
-
-}
-
-function window_resize()
-{
-	var workspace_wrapper = document.getElementById('workspace_wrapper');
-	var workspace = document.getElementById('workspace');
-
-	var toolbar = document.getElementById('toolbar');
-
-		workspace_wrapper.style.width = (workspace_wrapper.parentNode.offsetWidth - 20) + 'px';
-		workspace_wrapper.style.height = ( document.height - toolbar.offsetHeight - 20) + 'px';
-
-		workspace.style.height = ( workspace_wrapper.offsetHeight - 5 ) + "px";
-		workspace.style.width = ( workspace_wrapper.offsetWidth - 5 )+ "px";
-
-	return( false );
-}
-
-function slider_initialize()
-{
-
-}
-
-function image_scale(scale_slider)
-{
-	var scale_ratio = scale_slider.value;
-	var workspace = document.getElementById('workspace');
 	
-		workspace.style.webkitTransform = "scale(" + scale_ratio + ")";
+	var image_data = ctx.getImageData( 0, 0, workspace_image.width , workspace_image.height);
+//	var image_data = ctx.getImageData( 0, 0, 10 , 10);
+	load_image_onto_database( image_data );
+}
+
+function load_image_onto_database( getImageData )
+{
+	var image_height = getImageData.height;
+	var image_width = getImageData.width;	
+	var pixelData = getImageData.data;
+	window.console.log('db onsite' , getImageData, image_height, image_width);
+	
+	var startTime = new Date();
+	window.console.log("Import started at ", startTime);
+
+	db.transaction(
+		function(tx)
+		{
+			for( var i = 0 ; i < image_height ; i ++ )
+			{
+				for( var j = 0 ; j < image_width ; j ++ )
+				{
+					tx.executeSql( "INSERT INTO PixelData (x , y , R , G, B, A) VALUES (?, ?, ?, ?, ?, ?)" ,
+					[j ,
+					 i ,
+					 pixelData[ j + ( i * image_height )    ] ,
+					 pixelData[ j + ( i * image_height ) + 1] ,
+					 pixelData[ j + ( i * image_height ) + 2] ,
+					 pixelData[ j + ( i * image_height ) + 3] ]
+	// 					,function(){},
+	// 					function(tx, error){
+	// 						window.console.log("error on write data array on database" , error.message)
+	// 					}
+					);
+					
+				}
+			}
+			//var endTime = new Date();
+			//window.console.log(  i ,'/',image_height, 'finished import', endTime - startTime);
+		})
+	
+}
+
+function init_web_database(){
+	try
+	{
+		if (window.openDatabase) {
+			var dbname = "pbedit_tmp";
+			if(development) dbname += "_dev";
+			db = openDatabase(dbname, database_version,"database pbedit image datarray",200000);
+			if (!db) 
+					alert("Some problem occurs. It may your database storage size limitation is too small for this application\nデータベースストレージ用の容量が不足しているなどの問題が発生しました。");
+			} else 
+			alert("Your browser does not support client-side database storage.");
+	}
+	catch(error)
+	{
+		window.console.log(error.message);
+	}
+	 init_image_temp();
+}
+
+function init_image_temp(){
+	// creating temp table for image storage
+	db.transaction(
+		function(tx)
+		{
+			var exist_table = 0;
+			//tx.executeSql(
+			//	"SELECT count(x) FROM PixelData LIMIT 1" , [] 
+				//function(tx, result)
+				//{
+				//	tx.executeSql("DROP PixelData",[]);
+				//}
+			//);
+			
+			tx.executeSql(
+				"CREATE TEMPORARY TABLE PixelData ( x NUMBER, y NUMBER, R NUMBER, G NUMBER, B NUMBER, A NUMBER)" , [], 
+				function(tx, result)
+				{
+					window.console.log('successed to create temporary table');
+				},
+				function(tx, err)
+				{
+					window.console.log('Error', err);
+				});
+
+			//test for adding data
+			// var x = 0;
+// 			var y = 0;
+// 			var ch = "R";
+// 			var pxValue = 1;
+// 
+// 			tx.executeSql(
+// 				"INSERT INTO PixelData (x , y , ch , val) VALUES (? , ? , ? , ?)" ,
+// 				[x , y , ch, pxValue],
+// 				function(tx, result)
+// 				{
+// 					window.console.log('successed to add first data');
+// 				} ,
+// 				function(tx, error)
+// 				{
+// 					window.console.log("Error" , error.message);
+// 				}
+// 				);
+		}
+	);
 }
 
 function blur()
@@ -90,24 +173,11 @@ function blur()
 	var ctx = canvas.getContext("2d");
 	var image_data = ctx.getImageData( 0, 0, canvas.width , canvas.height);
 
-//	var image_data = ctx.getImageData( 0, 0, 10 , 10);
-// 	var imagejson = new JSON(image_data);
-// 	imagejson_string = JSONEncode(image_data);
-// 	window.console.log('got image data' , imagejson_string);
-	
 	var R = 0;
 	var G = 0;
 	var B = 0;
 
 	setTimeout( function(){ preview_process( 100 , image_data) } , 1);
-//	setTimeout( function(){ preview_process( 30 , image_data) } , 500);
-	
-// 	var blur_proc_1 = new Worker("./scripts/blur.js");
-// 	blur_proc_1.postMessage( image_data );
-// 	blur_proc_1.onmessage = function( event )
-// 	{
-// 		ctx.putImageData( event.data , 0, 0);
-// 	}
 	
 	setTimeout( function(){ real_process( image_data) } , 500);
 
@@ -174,4 +244,47 @@ function index_color( channel , real_color)
 		index_color = parseInt(real_color * 255);
 	
 	return(index_color);
+}
+
+
+// loading images
+function load_clipboard(event)
+{
+	var data = event.clipboardData.getData("Text");
+	var pasted_container = document.getElementById('preview');
+		
+	window.console.log('pasted', data, event.clipboardData, event.clipboardData.types );
+	if( event.clipboardData.types.every( function(element, index, key){return(element.match(/png/));}) )
+	{
+		window.console.log('img');
+	}
+	else if( hasURL(data) && data.match(/.+(png|jpg|gif|tiff)$/) )
+	{
+		pasted_container.innerHTML = "";
+		var thumbnail = document.createElement("img");
+		thumbnail.src = hasURL(data);
+		pasted_container.appendChild(thumbnail);
+		pasted_container.blur();
+	}
+	else
+	{
+		pasted_container.innerHTML = "";
+		pasted_container.innerHTML = "no image...";
+	}
+}
+
+function thumbnail_builder(event)
+{
+	// if IMG is built on preview area.
+	var target = event.target;
+		window.console.log('edited is image', event.target.nodeName);
+	if( event.target.nodeName == "IMG")
+	{
+		setTimeout( function(){load_image_on_canvas( target.src );} , 1 );
+	}
+}
+
+function pre_paste(event)
+{
+	document.getElementById("preview").focus();
 }
