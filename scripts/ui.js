@@ -23,6 +23,6 @@ function image_scale(scale_slider)
 {
 	var scale_ratio = scale_slider.value;
 	var workspace = document.getElementById('workspace');
-	
+	var current_scale = workspace.width
 		workspace.style.webkitTransform = "scale(" + scale_ratio + ")";
 }

@@ -1,8 +1,9 @@
 ﻿function init_pbtweet()
 {
+	development = "true";
+
 	//database initialize
 	database_version = "1.0";
-	development = "trur";
 	init_web_database();
 
 	//window.console.log('initialize');
@@ -59,7 +60,10 @@ function load_image_on_canvas( src )
 	ctx.drawImage(workspace_image, 0, 0, workspace.width, workspace.height);
 	
 	var image_data = ctx.getImageData( 0, 0, workspace_image.width , workspace_image.height);
-//	var image_data = ctx.getImageData( 0, 0, 10 , 10);
+//	smaller image for debug.
+//	var image_data = ctx.getImageData( 0, 0, 700 , 700);
+
+	init_image_temp();
 	load_image_onto_database( image_data );
 }
 
@@ -83,22 +87,21 @@ function load_image_onto_database( getImageData )
 					tx.executeSql( "INSERT INTO PixelData (x , y , R , G, B, A) VALUES (?, ?, ?, ?, ?, ?)" ,
 					[j ,
 					 i ,
-					 pixelData[ j + ( i * image_height )    ] ,
-					 pixelData[ j + ( i * image_height ) + 1] ,
-					 pixelData[ j + ( i * image_height ) + 2] ,
-					 pixelData[ j + ( i * image_height ) + 3] ]
-	// 					,function(){},
-	// 					function(tx, error){
-	// 						window.console.log("error on write data array on database" , error.message)
-	// 					}
+					 pixelData[ j + ( i * image_height )    ] / 255 ,
+					 pixelData[ j + ( i * image_height ) + 1] / 255 ,
+					 pixelData[ j + ( i * image_height ) + 2] / 255 ,
+					 pixelData[ j + ( i * image_height ) + 3] / 255]
+// 					 pixelData[ j + ( i * image_height )    ] ,
+// 					 pixelData[ j + ( i * image_height ) + 1] ,
+// 					 pixelData[ j + ( i * image_height ) + 2] ,
+// 					 pixelData[ j + ( i * image_height ) + 3] ]
 					);
 					
 				}
 			}
-			//var endTime = new Date();
-			//window.console.log(  i ,'/',image_height, 'finished import', endTime - startTime);
+			var endTime = new Date();
+			window.console.log(  i ,'/',image_height, 'finished import', endTime - startTime);
 		})
-	
 }
 
 function init_web_database(){
@@ -126,43 +129,35 @@ function init_image_temp(){
 		function(tx)
 		{
 			var exist_table = 0;
-			//tx.executeSql(
-			//	"SELECT count(x) FROM PixelData LIMIT 1" , [] 
-				//function(tx, result)
-				//{
-				//	tx.executeSql("DROP PixelData",[]);
-				//}
-			//);
-			
 			tx.executeSql(
-				"CREATE TEMPORARY TABLE PixelData ( x NUMBER, y NUMBER, R NUMBER, G NUMBER, B NUMBER, A NUMBER)" , [], 
+				"SELECT count(x) FROM PixelData LIMIT 1" , [] 
 				function(tx, result)
 				{
-					window.console.log('successed to create temporary table');
+					tx.executeSql(
+						"DROP TABLE PixelData",
+						[],
+						function()
+						{
+							window.console.log('Table removed successfully');
+						},
+						function(tx, error)
+						{
+							window.console.log("Error with table removing" , error.message);
+						});
 				},
-				function(tx, err)
-				{
-					window.console.log('Error', err);
-				});
-
-			//test for adding data
-			// var x = 0;
-// 			var y = 0;
-// 			var ch = "R";
-// 			var pxValue = 1;
-// 
-// 			tx.executeSql(
-// 				"INSERT INTO PixelData (x , y , ch , val) VALUES (? , ? , ? , ?)" ,
-// 				[x , y , ch, pxValue],
-// 				function(tx, result)
-// 				{
-// 					window.console.log('successed to add first data');
-// 				} ,
-// 				function(tx, error)
-// 				{
-// 					window.console.log("Error" , error.message);
-// 				}
-// 				);
+				function( tx, error ) {
+					tx.executeSql(
+						"CREATE TABLE PixelData ( x NUMBER, y NUMBER, R REAL, G REAL, B REAL, A REAL)" , [], 
+						function(tx, result)
+						{
+							window.console.log('successed to create temporary table');
+						},
+						function(tx, err)
+						{
+							window.console.log('Error', err);
+						});
+				}
+			);
 		}
 	);
 }
@@ -182,6 +177,23 @@ function blur()
 	setTimeout( function(){ real_process( image_data) } , 500);
 
 	document.imagedata = image_data;
+}
+
+function redraw()
+{
+//  Sample codes
+//	following code is for workers in future when WebKit supports openDatabase inside workers.
+//
+// 	window.console.log("redraw start");
+// 	var redraw = new Worker("scripts/worker_redraw.js");
+// 	redraw.postMessage('go');
+// 	window.console.log(redraw.onerror);
+// 	redraw.onmessage = function(event)
+// 	{
+// 		window.console.log(event.data);
+// 	};
+//
+
 }
 
 function preview_process( scale , image_data )
