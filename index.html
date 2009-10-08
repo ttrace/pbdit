@@ -21,10 +21,21 @@
 		</canvas>
 	</div>
 	
-	<div id = "layer">..
+	<div id = "layer">
 		<div class = thumbnail>
 			<div contenteditable = "true" id = "preview" style="">no image..</div>
 		</div>
+		<ul>
+			<li>
+				R:<input id="layer_R" name="layer_R" type="range" min="-50" max="50" value="0" onchange="" style="vertical-align : top;">
+			</li>
+			<li>
+				G:<input id="layer_G" name="layer_G" type="range" min="-50" max="50" value="0" onchange="" style="vertical-align : top;">
+			</li>
+			<li>
+				B:<input id="layer_B" name="layer_B" type="range" min="-50" max="50" value="0" onchange="" style="vertical-align : top;">
+			</li>
+		</ul>
 	</div>
 	
 	<footer>
@@ -35,10 +46,12 @@
 			<li>
 				<a href="javascript:redraw()" target="_blank">redraw</a>
 			</li>
-			<li id = "scale_slider_group">
-				Zoom: out <input id="scale_slider" name="scale_slider" type="range" min="1" max="10" value="0" onchange="image_scale(this)" style="vertical-align : top;"> in
+			<li>
+				<a href="javascript:redraw()" target="_blank">Share</a>
 			</li>
-
+			<li id = "scale_slider_group">
+				Zoom: <a href="javascript:fit_scale()" target="_blank">out</a> <input id="scale_slider" name="scale_slider" type="range" min="1" max="10" value="1" onchange="image_scale(this)" style="vertical-align : top;"> in
+			</li>
 		</ul>
 	</footer>
 </html>
