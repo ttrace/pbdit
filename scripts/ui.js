@@ -43,8 +43,8 @@ function fit_scale()
 		workspace.style.width = parseInt( workspace.width * workspace_scale -5) + "px";
 	
 	var scale_slider = document.getElementById('scale_slider');
-	scale_slider.value = workspace_scale / 1;
+		scale_slider.value = workspace_scale / 1;
 
-	window.console.log('scale' , workspace_scale, height_ratio, width_ratio);
+	if(debug)window.console.log('scale' , workspace_scale, height_ratio, width_ratio);
 	return(true);
 }

@@ -1,18 +1,16 @@
 ﻿function init_pbtweet()
 {
-	development = "true";
+	debug = "true";
+	window_resize();
 
 	//database initialize
-	database_version = "1.0";
-	init_web_database();
+	//database_version = "1.0";
+	//init_web_database();
 
-	//window.console.log('initialize');
+	preview_key = "";
+
 	// Event dispatch.
 	window.addEventListener ( 'resize' , function(){ window_resize() } , true);
-
-	// initialize window size.
-	// window resized event
-	window_resize();
 
 	// add mutation event on Thumbnail box
 	document.getElementById("preview").addEventListener( "DOMNodeInserted" ,
@@ -27,313 +25,197 @@ function load_image_on_canvas( src )
 {
 	var workspace_wrapper = document.getElementById('workspace_wrapper');
 
-	var workspace_image = new Image();
-		workspace_image.src = src;
+	var source_image = new Image();
+		source_image.src = src;
 		
 	var image_layer = new myCanvas();
-		image_layer.image = workspace_image;
+		image_layer.image = source_image;
 		
 	var workspace = document.getElementById('workspace');
+	var preview = document.getElementById('workspace_preview');
 
- 	var long_rate = Math.max( workspace_image.width , workspace_image.height ) / 1200;
- 	if( long_rate > 1 )
- 	{
- 		workspace_image.width = parseInt( workspace_image.width / long_rate ) ;
- 		workspace_image.height = parseInt( workspace_image.height / long_rate );
- 	}
- 		workspace.width = workspace_image.width;
- 		workspace.height = workspace_image.height;
+	var workspace_stored = document.getElementById('stored');
+	var preview_stored = document.getElementById('stored_preview');
+
+
+	var long_rate = Math.max( source_image.width , source_image.height ) / 1600;
+	if( long_rate > 1 )
+		{
+			source_image.width = parseInt( source_image.width / long_rate ) ;
+			source_image.height = parseInt( source_image.height / long_rate );
+		}
+		workspace.width = source_image.width;
+		workspace.height = source_image.height;
+		workspace_stored.width = source_image.width;
+		workspace_stored.height = source_image.height;
+
+	var long_rate_preview = Math.max( source_image.width , source_image.height ) / 200;
+	if( long_rate_preview > 1 )
+	{
+		preview.width = parseInt( source_image.width / long_rate_preview ) ;
+		preview.height = parseInt( source_image.height / long_rate_preview );
+		preview_stored.width = preview.width ;
+		preview_stored.height = preview.height ;
+	}
+	else
+	{
+		preview.width = source_image.width;
+		preview.height = source_image.height;
+		preview_stored.width = source_image.width;
+		preview_stored.height = source_image.height;
+	}
+	
+	if(debug)window.console.log(preview.width, preview.height);
 
 	fit_scale();
 	
-	ctx = workspace.getContext('2d');
-	ctx.drawImage(workspace_image, 0, 0, workspace.width, workspace.height);
+	// draw image on canvas
+	var ctx = workspace.getContext('2d');
+		ctx.drawImage(source_image, 0, 0, workspace.width, workspace.height);
+	var ctx_stored = workspace_stored.getContext('2d');
+		ctx_stored.drawImage(source_image, 0, 0, workspace_stored.width, workspace_stored.height);
+
+	// draw image on preview canvas
+	var ctx_preview = preview.getContext('2d');
+		ctx_preview.drawImage(source_image, 0, 0, preview.width, preview.height);
+	var ctx_preview_stored = preview_stored.getContext('2d');
+		ctx_preview_stored.drawImage(source_image, 0, 0, preview_stored.width, preview_stored.height);
 	
-	var image_data = ctx.getImageData( 0, 0, workspace_image.width , workspace_image.height);
+	//var image_data = ctx.getImageData( 0, 0, workspace_image.width , workspace_image.height);
 
-	init_image_temp();
-	load_image_onto_database( image_data );
-}
-
-function load_image_onto_database( getImageData )
-{
-	var image_height = getImageData.height;
-	var image_width = getImageData.width;	
-	var pixelData = getImageData.data;
-	window.console.log('db onsite' , getImageData, image_height, image_width);
-	
-	var startTime = new Date();
-	window.console.log("Import started at ", pixelData);
-
-	db.transaction(
-		function(tx)
-		{
-			for( var i = 0 ; i < image_height ; i ++ )
-			{
-				for( var j = 0 ; j < image_width ; j ++ )
-				{
-					tx.executeSql( "INSERT INTO PixelData (x , y , R , G, B, A) VALUES (?, ?, ?, ?, ?, ?)" ,
-					[j ,
-					 i ,
-					 pixelData[ ( j + ( i * image_width ) ) * 4    ] / 255 ,
-					 pixelData[ ( j + ( i * image_width ) ) * 4 + 1] / 255 ,
-					 pixelData[ ( j + ( i * image_width ) ) * 4 + 2] / 255 ,
-					 pixelData[ ( j + ( i * image_width ) ) * 4 + 3] / 255]
-					);
-				}
-			}
-			var endTime = new Date();
-			window.console.log(  i ,'/',image_height, 'finished import', endTime - startTime);
-		})
-}
-
-function init_web_database(){
-	try
-	{
-		if (window.openDatabase) {
-			var dbname = "pbedit_tmp";
-			if(development) dbname += "_dev";
-			db = openDatabase(dbname, database_version,"database pbedit image datarray",200000);
-			if (!db) 
-					alert("Some problem occurs. It may your database storage size limitation is too small for this application\nデータベースストレージ用の容量が不足しているなどの問題が発生しました。");
-			} else 
-			alert("Your browser does not support client-side database storage.");
-	}
-	catch(error)
-	{
-		window.console.log(error.message);
-	}
-	document.first_load = true;
-	init_image_temp();
-}
-
-function init_image_temp(){
-	// creating temp table for image storage
-	db.transaction(
-		function(tx)
-		{
-			var exist_table = 0;
-			tx.executeSql(
-				"SELECT MAX(x), MAX(y) FROM PixelData" , [] ,
-				function(tx, result)
-				{
-					if( document.first_load != true )
-					{
-						tx.executeSql(
-							"DROP TABLE PixelData",
-							[],
-							function()
-							{
-								window.console.log('Table removed successfully');
-							},
-							function(tx, error)
-							{
-								window.console.log("Error with table removing" , error.message);
-							});
-						tx.executeSql(
-							"CREATE TABLE PixelData ( x NUMBER, y NUMBER, R REAL, G REAL, B REAL, A REAL)" , [], 
-							function(tx, result)
-							{
-								window.console.log('successed to create table');
-							},
-							function(tx, err)
-							{
-								window.console.log('Error', err);
-							});
-					}
-					else
-					{
-						// restore image from database.
-						var row = result.rows.item(0);
-
-						var image_width = row['MAX(x)'] + 1;
-						var image_height = row['MAX(y)'] + 1;
-						
-						window.console.log(image_width, image_height)
-
-						var workspace = document.getElementById('workspace');
-							workspace.width = image_width;
-							workspace.height = image_height;
-
-						fit_scale();
-						document.first_load = false;
-						//color_evolved_view( [] );
-						redraw();
-					}
-				},
-				function( tx, error ) {
-					tx.executeSql(
-						"CREATE TABLE PixelData ( x NUMBER, y NUMBER, R REAL, G REAL, B REAL, A REAL)" , [], 
-						function(tx, result)
-						{
-							window.console.log('successed to create temporary table');
-						},
-						function(tx, err)
-						{
-							window.console.log('Error', err);
-						});
-				}
-			);
-		}
-	);
-}
-
-function color_evolved_view()
-{
-	db.transaction(
-		function(tx){
-// 			tx.executeSql(
-// 				"SELECT COUNT(x) FROM Filter LIMIT 1",[],
-// 				function(tx){},
-// 				function(tx, err)
-// 				{
-// 					tx.executeSql(
-// 						"DROP VIEW Filter",[]
-// 					);
-// 					window.console.log('removed Filter');
-// 				}
-// 			);
-// 
-			var mySqlSeed = "CREATE VIEW Filter AS SELECT x, y ,R ,G ,B ,A FROM PixelData";
-			var SqlReplace = /R\ \,\G\ \,B\ /;
-			var expression = color_expression();
-			var expression_str = expression[0] + "," + expression[1] + "," + expression[2] ;
-			var exSql = mySqlSeed.replace( SqlReplace , expression_str);
-			tx.executeSql(
-				exSql,
-				[],
-				function(tx, result)
-				{
-					window.console.log( exSql, 'successed to create color Filter');
-				},
-				function(tx, err)
-				{
-					window.console.log('Error', err.message);
-				});
-		}
-	);
+	//init_image_temp();
+	//load_image_onto_database( image_data );
 }
 
 function color_expression()
 {
-	var R_biass = "R*" + (( document.getElementById("layer_R").value / 50 ) + 1);
-	var G_biass = "G*" + (( document.getElementById("layer_G").value / 50 ) + 1);
-	var B_biass = "B*" + (( document.getElementById("layer_B").value / 50 ) + 1);
+	var R_biass = ( document.getElementById("layer_R").value / 50 ) + 1;
+	var G_biass = ( document.getElementById("layer_G").value / 50 ) + 1;
+	var B_biass = ( document.getElementById("layer_B").value / 50 ) + 1;
 	
-	window.console.log([ R_biass ,G_biass ,B_biass ]);
-	return([ R_biass ,G_biass ,B_biass ]);
+	return([ R_biass , G_biass , B_biass ]);
 }
 
 function blur()
 {
-	var canvas =  document.getElementById("workspace");
+	var canvas =  document.getElementById("stored");
 	var ctx = canvas.getContext("2d");
+
+	var preview_canvas =  document.getElementById("stored_preview");
+	var preview_ctx = preview_canvas.getContext("2d");
+
 	var image_data = ctx.getImageData( 0, 0, canvas.width , canvas.height);
+	var preview_image_data = preview_ctx.getImageData( 0, 0, preview_canvas.width , preview_canvas.height);
 
-	setTimeout( function(){ preview_process( 10 , image_data) } , 1);
-	setTimeout( function(){ real_process( image_data) } , 50);
-
-	document.imagedata = image_data;
+	setTimeout( function(){ preview_process( 1 , preview_image_data) } , 1);
+	setTimeout( function(){ real_process( image_data) } , 100);
 }
 
-function redraw()
+function color_change()
 {
-//  Sample codes
-//	following code is for workers in future when WebKit supports openDatabase inside workers.
-/*
-// 	window.console.log("redraw start");
-// 	var redraw = new Worker("scripts/worker_redraw.js");
-// 	redraw.postMessage('go');
-// 	window.console.log(redraw.onerror);
-// 	redraw.onmessage = function(event)
-// 	{
-// 		window.console.log(event.data);
-// 	};
-*/
-	color_evolved_view();
+	var preview_canvas =  document.getElementById("stored_preview");
+	var preview_ctx = preview_canvas.getContext("2d");
+	var preview_image_data = preview_ctx.getImageData( 0, 0, preview_canvas.width , preview_canvas.height);
+
+	preview_key = guid();
+	var current_key = preview_key + "";
+	setTimeout( function(){ preview_process( 1 , preview_image_data) } , 1);
+	setTimeout( function(){ final_process_startar( current_key ) } , 800);
+	return(false);
+}
+
+function final_process_startar ( current_key )
+{
+	if( current_key == preview_key )
+	{
+		var canvas =  document.getElementById("stored");
+		var ctx = canvas.getContext("2d");
+		var image_data = ctx.getImageData( 0, 0, canvas.width , canvas.height);
+		real_process( image_data , current_key );
+	}
+	return( false );
+}
+
+function preview_process( scale , preview_image_data )
+{
+	var workspace =  document.getElementById("workspace");
+
+	var preview_canvas = document.getElementById("workspace_preview");
+	var preview_ctx = preview_canvas.getContext("2d");
+
+		preview_canvas.style.height = workspace.offsetHeight + "px";
+		preview_canvas.style.width = workspace.offsetWidth + "px";
+		preview_canvas.style.top = workspace.offsetTop + "px";
+		preview_canvas.style.left = workspace.offsetLeft + "px";
 	
-	db.transaction(
-		function(tx)
-		{
-			var canvas =  document.getElementById("workspace");
-			var ctx = canvas.getContext("2d");
-
-			var PixelDataArray = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-			//var mySqlSeed = "SELECT R ,G ,B ,A FROM Filter";
-			var mySqlSeed = "SELECT R ,G ,B ,A FROM PixelData";
-//			var SqlReplace = /R\ \,\G\ \,B\ /;
-//			var expression = color_expression();
-//			var expression_str = '"' + expression[0] + '","' + expression[1] + '","' + expression[2] + '"' ;
-//			var exSql = mySqlSeed.replace( SqlReplace , expression_str);
-
-//			window.console.log('get filter', exSql);
-
-			tx.executeSql(
-				mySqlSeed,
-				[],
-				function(tx , result)
-				{
-					for( var i = 0 ; i < result.rows.length ; i++ )
-					{
-						var row = result.rows.item(i);
-// 						PixelDataArray.data[ i * 4     ] = parseInt(row['"'+expression[0]+'"'] * 255); // R
-// 						PixelDataArray.data[ i * 4 + 1 ] = parseInt(row['"'+expression[1]+'"'] * 255); // G
-// 						PixelDataArray.data[ i * 4 + 2 ] = parseInt(row['"'+expression[2]+'"'] * 255); // B
-// 						PixelDataArray.data[ i * 4 + 3 ] = parseInt(row['A'] * 255); // A
-						PixelDataArray.data[ i * 4     ] = parseInt(row['R'] * (( document.getElementById("layer_R").value / 50 ) + 1) * 255); // R
-						PixelDataArray.data[ i * 4 + 1 ] = parseInt(row['G'] * (( document.getElementById("layer_G").value / 50 ) + 1) * 255); // G
-						PixelDataArray.data[ i * 4 + 2 ] = parseInt(row['B'] * (( document.getElementById("layer_B").value / 50 ) + 1) * 255); // B
-						PixelDataArray.data[ i * 4 + 3 ] = parseInt(row['A'] * 255); // A
-					}
-					window.console.log('Export', PixelDataArray);
-					ctx.putImageData(PixelDataArray, 0, 0);
-				}
-			);
-		}
-	);
-}
-
-function preview_process( scale , image_data )
-{
-	var canvas =  document.getElementById("workspace");
-	var ctx = canvas.getContext("2d");
+	//if(debug)window.console.log( preview_canvas.style.top, preview_canvas.style.left);
+	
+	addClass(preview_canvas , 'previewing');
 
 	var preArray = new Array();
 	var preR = 0;
 	var preG = 0;
 	var preB = 0;
 
-	for( var xi = 0 ; xi < (image_data.width / scale) ; xi ++)
+	var color_biass = color_expression();
+
+	for( var i = 0 ; i < (preview_image_data.data.length) ; i += 4 )
 	{
-		for( var yi = 0 ; yi < (image_data.height / scale) ; yi ++)
-		{
-			preArray = get_pixel_collor_array( (xi * scale), (yi * scale) , image_data );
-			preR = preArray[0];
-			preG = preArray[1];
-			preB = preArray[2];
-			ctx.fillStyle = "rgb(" + preR + " , " + preG + " , " + preB + ")";
-			ctx.fillRect ( (xi * scale), (yi * scale), scale, scale);
-		}
+		preview_image_data.data[i]     = index_color ("R" , real_color( "R" , preview_image_data.data[ i ]    ) * color_biass[0] );
+		preview_image_data.data[i + 1] = index_color ("G" , real_color( "G" , preview_image_data.data[ i + 1 ]) * color_biass[1] );
+		preview_image_data.data[i + 2] = index_color ("B" , real_color( "B" , preview_image_data.data[ i + 2 ]) * color_biass[2] );
 	}
+	
+	preview_ctx.putImageData(preview_image_data, 0, 0);
+
+//	following codes for block previewing
+
+// 	for( var xi = 0 ; xi < (image_data.width / scale) ; xi ++)
+// 	{
+// 		for( var yi = 0 ; yi < (image_data.height / scale) ; yi ++)
+// 		{
+// 			preArray = get_pixel_collor_array( (xi * scale), (yi * scale) , image_data );
+// 			preR = preArray[0];
+// 			preG = preArray[1];
+// 			preB = preArray[2];
+// 			preview_ctx.fillStyle = "rgb(" + preR + " , " + preG + " , " + preB + ")";
+// 			preview_ctx.fillRect ( (xi * scale), (yi * scale), scale, scale);
+// 		}
+// 	}
 }
 
-function real_process( image_data )
+function real_process( image_data , current_key )
 {
 	var canvas =  document.getElementById("workspace");
 	var ctx = canvas.getContext("2d");
 
-	for( var i = 0 ; i < (image_data.data.length) ; i ++ )
+	var color_biass = color_expression();
+	var thread_length = 1000;
+	
+	for( var i = 0 ; ( i < image_data.data.length && preview_key == current_key) ; i += 4 )
 	{
-		image_data.data[i]     = index_color ("R" , real_color( "R" , image_data.data[ i ]    ) * 1.1);
-		image_data.data[i + 1] = index_color ("G" , real_color( "G" , image_data.data[ i + 1 ]) * 1.3);
-		image_data.data[i + 2] = index_color ("B" , real_color( "B" , image_data.data[ i + 2 ]) * 1.5);
+		if( preview_key != current_key )
+		{
+			if(debug)window.console.log('Stopped', i, current_key, preview_key);
+			break;
+		}
+		image_data.data[i]     = index_color ("R" , real_color( "R" , image_data.data[ i ]    ) * color_biass[0] );
+		image_data.data[i + 1] = index_color ("G" , real_color( "G" , image_data.data[ i + 1 ]) * color_biass[1] );
+		image_data.data[i + 2] = index_color ("B" , real_color( "B" , image_data.data[ i + 2 ]) * color_biass[2] );
 	}
 	
-
 	var ctx = canvas.getContext("2d");
 	ctx.putImageData(image_data, 0, 0);
+	var preview_canvas = document.getElementById("workspace_preview");
+		preview_canvas.style.width = "0px";
+		preview_canvas.style.height = "0px";
+
+	var image_export_link = document.getElementById('image_share');
+		image_export_link.href = canvas.toDataURL("image/png", "exported.png");
+
+	removeClass(preview_canvas , 'previewing');
 }
+
 
 function get_pixel_collor_array( x , y , image_data )
 {

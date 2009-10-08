@@ -37,9 +37,16 @@ body
 	border : 1px white solid;
 	position : absolute;
 	text-align : center;
+	vertical-align : middle;
 	top : 10px;
 	left : 10px;
 	overflow : auto;
+}
+
+#workspace , #workspace_preview
+{
+	display : inline ;
+	vertical-align : middle;
 }
 
 #workspace
@@ -47,13 +54,38 @@ body
 	-webkit-transition-property : -webkit-transform, width, height;
 	-webkit-transition-duration : 0.2s;
 	-webkit-transition-timing-function: ease-in;
-	display : inline;
+}
+
+#workspace_wrapper canvas.preview
+{
+	position : absolute;
+	width : 0px;
+	height : 0px;
+	visibility : hidden;
+}
+
+#workspace_wrapper canvas.previewing
+{
+	visibility : visible;
 }
 
 #scale_slider_group
 {
 	position : absolute;
 	right : 60px;
+}
+
+#stored_image
+{
+	overflow : hidden ;
+	width : 0px;
+	height : 0px;
+}
+
+#stored_image canvas
+{
+	width : 100px;
+	height : 100px;
 }
 
 /*layer*/
