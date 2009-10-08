@@ -1,4 +1,6 @@
-app for demonstoration HTML5 and workers
+app for demonstoration HTML5 and workers.
+-Image manipulation with using canvas
+-Data saving with using client-side-database-storage 
 
 pbedit is published under MIT License.
 
