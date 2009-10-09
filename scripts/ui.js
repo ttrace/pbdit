@@ -16,18 +16,31 @@ function window_resize()
 
 function image_scale(scale_slider)
 {
+	var workspace = document.getElementById('workspace');
+
 	if( scale_slider.value != 0)
 	{
-		var scale_ratio = scale_slider.value;
+		var scale_ratio = scale_slider.value / 5 + 0.5;
 	}
 	else
 	{
 		fit_scale();	
 	}
-	var workspace = document.getElementById('workspace');
 	var current_scale = workspace.width
 		workspace.style.width = (scale_ratio * workspace.width) + "px";
 		workspace.style.height = (scale_ratio * workspace.height) + "px";
+
+// 	var workspace_wrapper = document.getElementById('workspace_wrapper');
+// 	var ws_o_height = workspace_wrapper.offsetHeight;
+// 	var ws_o_width = workspace_wrapper.offsetWidth;
+// 	var ws_height = workspace.offsetHeight;
+// 	var ws_width = workspace.offsetWidth;
+// 	
+// 	var target_y = (ws_height - ws_o_height) / 2;
+// 	var target_x = (ws_width - ws_o_width) / 2;
+// 	if(debug)window.console.log('scroll to' , target_x , target_y);
+// 	workspace_wrapper.scrollLeft = (scale_ratio * workspace.width) / 2 - ws_o_width / 2;
+// 	workspace_wrapper.scrollTop = (scale_ratio * workspace.height) / 2 -  ws_o_height / 2;
 }
 
 function fit_scale()

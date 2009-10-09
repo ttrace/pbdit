@@ -16,9 +16,38 @@
 	document.getElementById("preview").addEventListener( "DOMNodeInserted" ,
 		function(e)
 		{
-			thumbnail_builder(e);
+			if( e.target.nodeName == "IMG" )
+			{
+				e.target.addEventListener("load", 
+				function(e)
+				{
+					window.console.log('LOADED' , e.target);
+					thumbnail_builder(e);
+				}
+				, true );		
+			}
+			//thumbnail_builder(e);
 		}
 		, false );
+	
+	if( location.href.match(/\?.+/) )
+	{
+		if(debug)window.console.log('load image from URL', location.href.match(/\?(.+)/));
+		
+		var extended_src = location.href.match(/\?(.+)/)[1];
+		
+		var pasted_container = document.getElementById('preview');
+		if( extended_src.match(/.+(png|jpg|jpeg|gif|tiff|tif)$/) )
+			{
+				pasted_container.innerHTML = "";
+				var thumbnail = document.createElement("img");
+				thumbnail.src = extended_src;
+				if(debug)window.console.log("pasted url", extended_src);
+				pasted_container.appendChild(thumbnail);
+				pasted_container.blur();
+			}
+		//load_image_on_canvas( location.href.match(/\?(.+)/)[1] )
+	}
 }
 
 function load_image_on_canvas( src )
@@ -254,16 +283,18 @@ function load_clipboard(event)
 	var data = event.clipboardData.getData("Text");
 	var pasted_container = document.getElementById('preview');
 		
-	window.console.log('pasted', data, event.clipboardData, event.clipboardData.types );
-	if( event.clipboardData.types.every( function(element, index, key){return(element.match(/png/));}) )
+	//window.console.log('pasted', data, event.clipboardData, event.clipboardData.types );
+
+	if( !event.clipboardData.types.every( function(element, index, key){return(!element.match(/image/));}) )
 	{
-		window.console.log('img');
+		window.console.log('pasted is img');
 	}
-	else if( hasURL(data) && data.match(/.+(png|jpg|gif|tiff)$/) )
+	else if( hasURL(data) && data.match(/.+(png|jpg|jpeg|gif|tiff|tif)$/) )
 	{
 		pasted_container.innerHTML = "";
 		var thumbnail = document.createElement("img");
 		thumbnail.src = hasURL(data);
+		window.console.log("pasted url", hasURL(data));
 		pasted_container.appendChild(thumbnail);
 		pasted_container.blur();
 	}
@@ -278,10 +309,19 @@ function thumbnail_builder(event)
 {
 	// if IMG is built on preview area.
 	var target = event.target;
-		window.console.log('edited is image', event.target.nodeName);
-	if( event.target.nodeName == "IMG")
+	var pasted_container = document.getElementById('preview');
+
+	if( target.nodeName == "IMG")
 	{
 		setTimeout( function(){load_image_on_canvas( target.src );} , 1 );
+		pasted_container.innerHTML = "";
+
+	}
+	else if( target.getElementsByTagName("img")[0] )
+	{
+		target = target.getElementsByTagName("img")[0];
+		setTimeout( function(){load_image_on_canvas( target.src );} , 1 );		
+		pasted_container.innerHTML = "";
 	}
 }
 

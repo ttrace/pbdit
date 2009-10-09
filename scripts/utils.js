@@ -37,7 +37,7 @@ removeClass = function(ele,cls)
 hasURL = function( string )
 {
 	window.console.log( "hasURL" , string );
-	var url_detection_regexp = /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
+	var url_detection_regexp = /(file|http|https):\/\/\/?(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
 	if( string.match( url_detection_regexp ) )
 	{
 		window.console.log( 'URL detector' , string.match( url_detection_regexp )[0] );
