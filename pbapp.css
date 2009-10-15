@@ -125,3 +125,23 @@ body
 	max-height : 73px;
 	vertical-align : middle;
 }
+
+
+/* Filter interface */
+.filter ul
+{
+	margin : 5px;
+	padding : 0px;
+}
+
+.filter li
+{
+	margin : 0px;
+	display : block ;
+	list-style-type : none;
+}
+
+.filter input[type="range"]
+{
+	width : 100px;
+}

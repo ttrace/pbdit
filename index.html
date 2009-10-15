@@ -23,21 +23,30 @@
 		</canvas>
 	</div>
 	
-	<div id = "layer">
+	<div id = "layer" class = "layer">
 		<div class = thumbnail>
 			<div contenteditable = "true" id = "preview" style="">no image..</div>
 		</div>
-		<ul>
-			<li>
-				R:<input id="layer_R" name="layer_R" type="range" min="-50" max="50" value="0" onchange="color_change()" style="vertical-align : top;">
-			</li>
-			<li>
-				G:<input id="layer_G" name="layer_G" type="range" min="-50" max="50" value="0" onchange="color_change()" style="vertical-align : top;">
-			</li>
-			<li>
-				B:<input id="layer_B" name="layer_B" type="range" min="-50" max="50" value="0" onchange="color_change()" style="vertical-align : top;">
-			</li>
-		</ul>
+		<div class="filter">
+			<ul>
+				<li>
+					R:<input id="layer_R" name="layer_R" type="range" min="-50" max="50" value="0" onchange="color_change()" style="vertical-align : top;">
+				</li>
+				<li>
+					G:<input id="layer_G" name="layer_G" type="range" min="-50" max="50" value="0" onchange="color_change()" style="vertical-align : top;">
+				</li>
+				<li>
+					B:<input id="layer_B" name="layer_B" type="range" min="-50" max="50" value="0" onchange="color_change()" style="vertical-align : top;">
+				</li>
+			</ul>		
+		</div>
+		<div class="filter">
+			<ul>
+				<li>
+					amount:<input id="blur" name="blur" type="range" min="0" max="100" value="0" onchange="image_blur()" style="vertical-align : top;">
+				</li>
+			</ul>		
+		</div>
 		<div id="stored_image">
 			<canvas id = "stored" width = "300" height = "300" >
 			</canvas>
@@ -59,6 +68,7 @@
 			</li>
 		</ul>
 	</footer>
+	
 <script type="text/javascript">
 var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
 document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));

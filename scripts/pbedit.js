@@ -116,6 +116,121 @@ function load_image_on_canvas( src )
 	//load_image_onto_database( image_data );
 }
 
+function image_blur()
+{
+	document.blur_progress = 0;
+	try
+	{
+		clearInterval(blur_timer);
+	}
+	catch(e)
+	{
+		if(debug)window.console.log(e.message);
+	}
+	
+	var preview_canvas =  document.getElementById("workspace_preview");
+	var preview_ctx = preview_canvas.getContext("2d");
+	var preview_image_data = preview_ctx.getImageData( 0, 0, preview_canvas.width , preview_canvas.height);
+
+	preview_key = guid();
+	var current_key = preview_key;
+	setTimeout( function(){ preview_blur( 1 , preview_image_data) } , 1);
+	//blur_timer = setInterval( function(){ blur_process_startar( current_key ) } , 50);
+	return(false);
+}
+
+function blur_process_startar ( current_key )
+{
+	var canvas =  document.getElementById("workspace");
+	var ctx = canvas.getContext("2d");
+	var image_data = ctx.getImageData( 0, 0, canvas.width , canvas.height);
+
+	if( current_key == preview_key && document.blur_progress < image_data.data.length )
+	{
+		if(!document.blur_progress)document.color_progress = 0;
+		var start_offset = document.blur_progress;
+		real_process( start_offset );
+		document.blur_progress += 1000000;
+	}
+	else
+	{
+		clearInterval(blur_timer);
+		document.blur_progress = 0;
+	}
+	return( false );
+}
+
+function blur_expression()
+{
+	var slider_index = document.getElementById("blur").value * 0.001 ;
+	var amount = parseInt( document.getElementById("workspace").width * slider_index );
+	
+	return( amount );
+}
+
+function preview_blur( scale , preview_image_data )
+{
+	var workspace =  document.getElementById("workspace");
+
+	var preview_canvas = document.getElementById("workspace_preview");
+	var preview_ctx = preview_canvas.getContext("2d");
+
+		preview_canvas.style.height = workspace.offsetHeight + "px";
+		preview_canvas.style.width = workspace.offsetWidth + "px";
+		preview_canvas.style.top = workspace.offsetTop + "px";
+		preview_canvas.style.left = workspace.offsetLeft + "px";
+	addClass(preview_canvas , 'previewing');
+
+	var preview_scale = preview_canvas.width / workspace.width;
+
+	var preArray = new Array();
+	var preR = 0;
+	var preG = 0;
+	var preB = 0;
+
+	var blur_ammount = blur_expression();
+
+	var preview_blur_pixel = parseInt( blur_ammount * preview_scale / 2 );
+	if(debug)window.console.log('preview_blur_started:', preview_image_data.width, " scale: ",preview_scale, blur_ammount , preview_blur_pixel);
+
+	for( var i = 0 ; i < (preview_image_data.data.length) ; i += 4 )
+	{
+		var amount_R = 0;
+		var amount_G = 0;
+		var amount_B = 0;
+		var amount_A = 0;
+		var sample_case = 0;
+		var ignor_case = 0;
+
+		for( var yi = preview_blur_pixel * -1 ; yi < preview_blur_pixel ; yi++ )
+		{
+			var y = parseInt(( i / 4 ) / preview_image_data.width) + yi;
+			for( var xi = preview_blur_pixel * -1 ; xi < preview_blur_pixel ; xi++)
+			{
+				var x = ( i / 4 ) % preview_image_data.width + xi;
+				if( x >= 0 && x < preview_image_data.width && y >= 0 && y < preview_image_data.height )
+				{
+					amount_R += real_color("R" , preview_image_data.data[(i + ((xi + yi * preview_image_data.width) * 4))    ] );
+					amount_G += real_color("G" , preview_image_data.data[(i + ((xi + yi * preview_image_data.width) * 4)) + 1] );
+					amount_B += real_color("B" , preview_image_data.data[(i + ((xi + yi * preview_image_data.width) * 4)) + 2] );
+					amount_A += real_color("A" , preview_image_data.data[(i + ((xi + yi * preview_image_data.width) * 4)) + 3] );
+					sample_case++
+				}
+				else
+				{
+					ignor_case++ ;
+				}
+			}
+		}
+		preview_image_data.data[i]     = index_color ("R" , amount_R / sample_case );
+		preview_image_data.data[i + 1] = index_color ("G" , amount_G / sample_case );
+		preview_image_data.data[i + 2] = index_color ("B" , amount_B / sample_case );
+		preview_image_data.data[i + 3] = index_color ("A" , amount_A / sample_case );
+	}	
+	preview_ctx.putImageData(preview_image_data, 0, 0);
+}
+
+// color convolution
 function color_expression()
 {
 	var R_biass = ( document.getElementById("layer_R").value / 50 ) + 1;
@@ -125,20 +240,6 @@ function color_expression()
 	return([ R_biass , G_biass , B_biass ]);
 }
 
-function blur()
-{
-	var canvas =  document.getElementById("stored");
-	var ctx = canvas.getContext("2d");
-
-	var preview_canvas =  document.getElementById("stored_preview");
-	var preview_ctx = preview_canvas.getContext("2d");
-
-	var image_data = ctx.getImageData( 0, 0, canvas.width , canvas.height);
-	var preview_image_data = preview_ctx.getImageData( 0, 0, preview_canvas.width , preview_canvas.height);
-
-	setTimeout( function(){ preview_process( 1 , preview_image_data) } , 1);
-	setTimeout( function(){ real_process( image_data) } , 100);
-}
 
 function color_change()
 {
@@ -158,9 +259,8 @@ function color_change()
 
 	preview_key = guid();
 	var current_key = preview_key;
-	setTimeout( function(){ preview_process( 1 , preview_image_data) } , 1);
-	color_timer = setInterval( function(){ final_process_startar( current_key ) } , 100);
-//	window.console.log(current_key , preview_key , (current_key == preview_key));
+	setTimeout( function(){ preview_process( preview_image_data) } , 1);
+	color_timer = setInterval( function(){ final_process_startar( current_key ) } , 50);
 	return(false);
 }
 
@@ -185,7 +285,7 @@ function final_process_startar ( current_key )
 	return( false );
 }
 
-function preview_process( scale , preview_image_data )
+function preview_process( preview_image_data )
 {
 	var workspace =  document.getElementById("workspace");
 
@@ -197,14 +297,7 @@ function preview_process( scale , preview_image_data )
 		preview_canvas.style.top = workspace.offsetTop + "px";
 		preview_canvas.style.left = workspace.offsetLeft + "px";
 	
-	//if(debug)window.console.log( preview_canvas.style.top, preview_canvas.style.left);
-	
 	addClass(preview_canvas , 'previewing');
-
-	var preArray = new Array();
-	var preR = 0;
-	var preG = 0;
-	var preB = 0;
 
 	var color_biass = color_expression();
 
@@ -218,10 +311,8 @@ function preview_process( scale , preview_image_data )
 	preview_ctx.putImageData(preview_image_data, 0, 0);
 }
 
-//function real_process( image_data , start_offset )
 function real_process( start_offset )
 {
-//	var color_progress = document.color_progress;
 	var canvas =  document.getElementById("workspace");
 	var ctx = canvas.getContext("2d");
 	var image_data = ctx.getImageData( 0, 0, canvas.width , canvas.height);
@@ -246,15 +337,15 @@ function real_process( start_offset )
 	ctx.putImageData(image_data, 0, 0);
 
 	if( (start_offset + 1000000) > image_data.data.length )
-	{
-	var preview_canvas = document.getElementById("workspace_preview");
-		preview_canvas.style.width = "0px";
-		preview_canvas.style.height = "0px";
-
-	var image_export_link = document.getElementById('image_share');
-		image_export_link.href = canvas.toDataURL("image/png", "exported.png");
-		
-	removeClass(preview_canvas , 'previewing');
+	{	//	finished
+		var preview_canvas = document.getElementById("workspace_preview");
+			preview_canvas.style.width = "0px";
+			preview_canvas.style.height = "0px";
+	
+		var image_export_link = document.getElementById('image_share');
+			image_export_link.href = canvas.toDataURL("image/png", "exported.png");
+			
+		removeClass(preview_canvas , 'previewing');
 	}
 }
 
@@ -270,7 +361,6 @@ function get_pixel_collor_array( x , y , image_data )
 		color_array.push( image_data.data[ x * 4 + (y * image_Width * 4) + 1] ); // G
 		color_array.push( image_data.data[ x * 4 + (y * image_Width * 4) + 2] ); // B
 	
-	//window.console.log(x, y, color_array);
 	return(color_array)
 }
 
