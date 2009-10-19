@@ -43,6 +43,23 @@ function image_scale(scale_slider)
 // 	workspace_wrapper.scrollTop = (scale_ratio * workspace.height) / 2 -  ws_o_height / 2;
 }
 
+function activate_preview()
+{
+	var canvas_workspace_preview = document.getElementById("workspace_preview");
+		canvas_workspace_preview.style.height = workspace.offsetHeight + "px";
+		canvas_workspace_preview.style.width = workspace.offsetWidth + "px";
+		canvas_workspace_preview.style.top = workspace.offsetTop + "px";
+		canvas_workspace_preview.style.left = workspace.offsetLeft + "px";
+	addClass(canvas_workspace_preview , 'previewing');
+}
+
+function innactivate_preview()
+{
+		var canvas_workspace_preview = document.getElementById("workspace_preview");
+			canvas_workspace_preview.style.width = "0px";
+			canvas_workspace_preview.style.height = "0px";
+}
+
 function fit_scale()
 {
 	var workspace_wrapper = document.getElementById('workspace_wrapper');

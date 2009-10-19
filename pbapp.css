@@ -145,3 +145,32 @@ body
 {
 	width : 100px;
 }
+
+.filter .output canvas
+{
+	width : 40px;
+	height : 40px;
+}
+
+.filter .progress
+{
+	display:block;
+	margin-left: 5px;
+	width: 102px;
+	height: 6px;
+	min-width: 102px;
+	min-height: 6px;
+	padding 1px;
+	-webkit-border-radius : 3px;
+	background:-webkit-gradient(linear,left bottom, left top, to(#333), from(#999))	;
+}
+
+.filter .progress .bar
+{
+	width : 10px;
+	height: 4px;
+	min-height: 6px;
+	-webkit-border-radius : 2px;
+	background-color : #999;
+	background:-webkit-gradient(linear,left top, left bottom, from(#fff), to(#666), color-stop(0.3, #999))	;
+}

@@ -17,17 +17,23 @@
 	</header>
 
 	<div id = "workspace_wrapper">
-		<canvas id = "workspace" width = "300" height = "300" >
-		</canvas>
-		<canvas id = "workspace_preview" class="preview" width = "300" height = "300" >
-		</canvas>
+		<canvas id = "workspace" width = "300" height = "300" ></canvas>
+		<canvas id = "workspace_preview" class="preview" width = "300" height = "300" ></canvas>
 	</div>
 	
 	<div id = "layer" class = "layer">
 		<div class = thumbnail>
 			<div contenteditable = "true" id = "preview" style="">no image..</div>
 		</div>
-		<div class="filter">
+		<div class="filter" id = "color_edit">
+			<ul>
+				<li>
+					L:<input id="exposure" name="exposure" type="range" min="-50" max="50" value="0" onchange="color_change()" style="vertical-align : top;">
+				</li>
+				<li>
+					C:<input id="contrast" name="contrast" type="range" min="-50" max="50" value="0" onchange="color_change()" style="vertical-align : top;">
+				</li>
+			</ul>
 			<ul>
 				<li>
 					R:<input id="layer_R" name="layer_R" type="range" min="-50" max="50" value="0" onchange="color_change()" style="vertical-align : top;">
@@ -38,14 +44,29 @@
 				<li>
 					B:<input id="layer_B" name="layer_B" type="range" min="-50" max="50" value="0" onchange="color_change()" style="vertical-align : top;">
 				</li>
-			</ul>		
+			</ul>
+			<section class="progress">
+				<div class="bar"></div>
+			</section>
+			<section class="output">
+				<canvas id = "color_output" width = "300" height = "300" ></canvas>
+				<canvas id = "color_output_preview" width = "300" height = "300" ></canvas>			
+			</section>
 		</div>
-		<div class="filter">
-			<ul>
+		<div class="filter" id = "lens_blur">
+			Lens blur
+			<ul title = "Lens blur">
 				<li>
-					amount:<input id="blur" name="blur" type="range" min="0" max="100" value="0" onchange="image_blur()" style="vertical-align : top;">
+					amount:<input id="blur" name="blur" type="range" min="0" max="20" value="0" onchange="image_blur()" style="vertical-align : top;">
 				</li>
 			</ul>		
+			<section class="progress">
+				<div class="bar"></div>
+			</section>
+			<section class="output">
+				<canvas id = "blur_output" width = "300" height = "300" ></canvas>
+				<canvas id = "blur_output_preview" width = "300" height = "300" ></canvas>			
+			</section>
 		</div>
 		<div id="stored_image">
 			<canvas id = "stored" width = "300" height = "300" >
