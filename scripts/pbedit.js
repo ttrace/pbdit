@@ -159,7 +159,7 @@ function image_blur()
 	
 		if( arguments[0] != "preview" )
 		{
-			blur_timer = setInterval( function(){ blur_process_startar( current_key ) } , 25);
+			blur_timer = setInterval( function(){ blur_process_startar( current_key ) } , 15);
 		}
 		setTimeout( function(){ preview_blur( image_data_input_preview) } , 1);
 		return(false);
