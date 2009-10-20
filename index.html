@@ -7,9 +7,9 @@
 	</script>
 	<script src="scripts/ui.js" type="application/javascript" charset="utf-8"></script>
 	<script src="scripts/utils.js" type="application/javascript" charset="utf-8"></script>
-	<script src="scripts/pbedit.js" type="application/javascript" charset="utf-8"></script>
 	<script src="scripts/lenzblur.js" type="application/javascript" charset="utf-8"></script>
 	<script src="scripts/pixel_color_filter.js" type="application/javascript" charset="utf-8"></script>
+	<script src="scripts/pbedit.js" type="application/javascript" charset="utf-8"></script>
 	<script src="scripts/canvas.js" type="application/javascript" charset="utf-8"></script>
 	<script src="scripts/widget.js" type="application/javascript" charset="utf-8"></script>
 </head>
@@ -30,7 +30,8 @@
 		<div class="filter" id = "color_edit">
 			<ul>
 				<li>
-					L:<input id="exposure" name="exposure" type="range" min="-50" max="50" value="0" onchange="color_change()" style="vertical-align : top;">
+					<span class="input_index">L</span>
+					<input id="exposure" name="exposure" type="range" min="-50" max="50" value="0" onchange="color_change()" style="vertical-align : top;">
 				</li>
 				<li>
 					C:<input id="contrast" name="contrast" type="range" min="-50" max="50" value="0" onchange="color_change()" style="vertical-align : top;">
@@ -78,7 +79,7 @@
 		</div>
 	</div>
 	
-	<footer>
+	<menu class="bottom_tool">
 		<ul id = "toolbar">
 			<li>
 				<a href="image_loader.html" id = "" target = "">samples</a>
@@ -90,7 +91,7 @@
 				Zoom: <a href="javascript:fit_scale()" target="_blank">fit</a> <input id="scale_slider" name="scale_slider" type="range" min="1" max="10" value="1" onchange="image_scale(this)" style="vertical-align : top;"> in
 			</li>
 		</ul>
-	</footer>
+	</menu>
 	
 <script type="text/javascript">
 var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");

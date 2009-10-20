@@ -1,6 +1,6 @@
 ﻿function init_pbtweet()
 {
-	debug = true;
+	debug = false;
 	window_resize();
 
 	//database initialize
@@ -64,7 +64,7 @@ function load_image_on_canvas( src )
 	var preview_stored = document.getElementById('stored_preview');
 
 
-	var long_rate = Math.max( source_image.width , source_image.height ) / 1600;
+	var long_rate = Math.max( source_image.width , source_image.height ) / 1200;
 	if( long_rate > 1 )
 		{
 			source_image.width = parseInt( source_image.width / long_rate ) ;

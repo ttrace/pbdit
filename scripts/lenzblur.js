@@ -60,18 +60,19 @@ function blur_process_startar ( current_key )
 function blur_expression()
 {
 	var slider_index = document.getElementById("blur").value;
-//	var amount = 0;
-	var amount = slider_index;
-// 	if( slider_index > 11)
-// 	{
-// 		blur_ratio = slider_index * 0.00025;
-// 		amount = parseInt( document.getElementById("workspace").width * blur_ratio );
-// 	}
-// 	else if( slider_index != 0)
-// 	{
-// 		amount = 2;
-// 	}
-//	window.console.log(slider_index , amount);
+//	var amount = slider_index;
+
+	var amount = 0;
+ 	if( slider_index > 1)
+ 	{
+ 		blur_ratio = slider_index * 0.0025;
+ 		amount = parseInt( document.getElementById("workspace").width * blur_ratio );
+ 	}
+ 	else if( slider_index != 0)
+ 	{
+ 		amount = 2;
+ 	}
+	window.console.log(slider_index , amount);
 	return( amount );
 }
 
@@ -143,6 +144,11 @@ function real_blur_process( start_offset )
 	var image_width = image_data.width;
 	var image_height = image_data.height;
 
+	if(debug)
+	{
+		var benchmark_timer = new Date();
+	}
+
 	if( start_offset == 0)
 	{
 		var initial_canvas =  document.getElementById("color_output");
@@ -161,8 +167,6 @@ function real_blur_process( start_offset )
 
 	var	blur_pixel_length = Math.pow( blur_width , 2 );
 	var blur_pixel_array_offset = ( blur_amount * image_width + blur_amount );
-
-	//if(debug)window.console.log('progress' , start_offset,"/", image_data.data.length, " image_width", image_width, blur_pixel_array_offset);
 	
 	// blur cache process
 	var blur_cache = [];
@@ -183,19 +187,14 @@ function real_blur_process( start_offset )
 				var y = Math.round( cache_i / 4 / image_width );
 				if( x >= 0 && x >= ( center_x - blur_amount ) && x <= ( center_x + blur_amount ) && y >= 0 && y < image_height)
 				{
-					var blur_cache_array = [
-											real_color("R" , image_data.data[cache_i    ]),
-											real_color("G" , image_data.data[cache_i + 1]),
-											real_color("B" , image_data.data[cache_i + 2]),
-											real_color("A" , image_data.data[cache_i + 3]),
-											];
-
-					blur_cache = blur_cache.concat( blur_cache_array );
+					blur_cache.push(real_color("R" , image_data.data[cache_i    ]),
+									real_color("G" , image_data.data[cache_i + 1]),
+									real_color("B" , image_data.data[cache_i + 2]),
+									real_color("A" , image_data.data[cache_i + 3]));
 				}
 				else
 				{
-					var blur_cache_array = [null,null,null,null];
-					blur_cache = blur_cache.concat( blur_cache_array );
+					blur_cache.push( null,null,null,null );
 				}
 			}
 		}
@@ -210,20 +209,14 @@ function real_blur_process( start_offset )
 				var y = Math.round(cache_i / 4 / image_width);
 				if( x >= 0 && x >= ( center_x - blur_amount ) && x <= ( center_x + blur_amount ) && y >= 0 && y < image_height )
 				{
-					var blur_cache_array = [
-											real_color("R" , image_data.data[cache_i    ]),
-											real_color("G" , image_data.data[cache_i + 1]),
-											real_color("B" , image_data.data[cache_i + 2]),
-											real_color("A" , image_data.data[cache_i + 3]),
-											];
-
-					add_blur_cache = add_blur_cache.concat( blur_cache_array );
+					add_blur_cache.push(real_color("R" , image_data.data[cache_i    ]),
+										real_color("G" , image_data.data[cache_i + 1]),
+										real_color("B" , image_data.data[cache_i + 2]),
+										real_color("A" , image_data.data[cache_i + 3]));
 				}
 				else
 				{
-					var blur_cache_array = [null,null,null,null];
-					add_blur_cache = add_blur_cache.concat( blur_cache_array );
-
+					add_blur_cache.push( null,null,null,null );
 				}
 			}
 
@@ -242,6 +235,8 @@ function real_blur_process( start_offset )
 	ctx_workspace.putImageData(image_data, 0, 0);
 
 	progress( "lens_blur" , i / image_data.data.length );
+
+	if(debug)window.console.log('progress' , start_offset,"/", image_data.data.length, " duration: ", new Date() - benchmark_timer);
 
 	if( (start_offset + 20000) >= image_data.data.length )
 	{	//	blur_process finished

@@ -84,9 +84,6 @@ function preview_process( preview_image_data )
 	}
 	
 	preview_ctx.putImageData(preview_image_data, 0, 0);
-
-	// next preview pipeline
-	//setTimeout( function(){image_blur( 'preview' )} , 100 );
 }
 
 function real_process( start_offset )
@@ -107,29 +104,26 @@ function real_process( start_offset )
 	
 	for( var i = start_offset ; ( i < image_data.data.length && i < (start_offset + 1000000) ) ; i += 4 )
 	{
+		var contrast_base = Math.tan( color_biass[3] * 45 * Math.PI / 180);
 
 		var R = index_color ("R" , real_color( "R" , image_data.data[ i     ]) * color_biass[0] );
-//			R = R / 255;	
-			R = Math.tan( color_biass[3] * 45 * Math.PI / 180) * ( R - 0.5 )+0.5;
+			R = R / 255;	
+			R = contrast_base * ( R - 0.5 )+0.5;
 
 		var G = index_color ("G" , real_color( "G" , image_data.data[ i + 1 ]) * color_biass[1] );
-//			G = G / 255;			
-			G = Math.tan( color_biass[3] * 45 * Math.PI / 180) * ( G - 0.5 )+0.5;
+			G = G / 255;			
+			G = contrast_base * ( G - 0.5 )+0.5;
 		
 		var B = index_color ("B" , real_color( "B" , image_data.data[ i + 2 ]) * color_biass[2] );
-//			B = B / 255;			
-			B = Math.tan( color_biass[3] * 45 * Math.PI / 180) * ( B - 0.5 )+0.5;
+			B = B / 255;			
+			B = contrast_base * ( B - 0.5 )+0.5;
 
-//		image_data.data[i    ] = R * 255;
-//		image_data.data[i + 1] = G * 255;
-//		image_data.data[i + 2] = B * 255;
-		image_data.data[i    ] = R;
-		image_data.data[i + 1] = G;
-		image_data.data[i + 2] = B;
-
-//		image_data.data[i]     = index_color ("R" , real_color( "R" , image_data.data[ i ]    ) * color_biass[0] );
-//		image_data.data[i + 1] = index_color ("G" , real_color( "G" , image_data.data[ i + 1 ]) * color_biass[1] );
-//		image_data.data[i + 2] = index_color ("B" , real_color( "B" , image_data.data[ i + 2 ]) * color_biass[2] );
+		image_data.data[i    ] = R * 255;
+		image_data.data[i + 1] = G * 255;
+		image_data.data[i + 2] = B * 255;
+//		image_data.data[i    ] = R;
+//		image_data.data[i + 1] = G;
+//		image_data.data[i + 2] = B;
 	}
 	
 	ctx.putImageData(image_data, 0, 0);

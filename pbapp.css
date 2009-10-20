@@ -70,6 +70,12 @@ body
 	visibility : visible;
 }
 
+menu.bottom_tool
+{
+	margin : 0px;
+	padding : 0px;
+}
+
 #scale_slider_group
 {
 	position : absolute;
