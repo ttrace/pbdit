@@ -134,6 +134,11 @@ menu.bottom_tool
 
 
 /* Filter interface */
+.filter
+{
+	border-top: solid 1px white;
+}
+
 .filter ul
 {
 	margin : 5px;
@@ -145,6 +150,15 @@ menu.bottom_tool
 	margin : 0px;
 	display : block ;
 	list-style-type : none;
+}
+
+.filter .input_index
+{
+	display : block;
+	float : left;
+	width : 60px;
+	text-align: right;
+	padding-right : 5px;
 }
 
 .filter input[type="range"]

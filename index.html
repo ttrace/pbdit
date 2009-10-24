@@ -34,18 +34,22 @@
 					<input id="exposure" name="exposure" type="range" min="-50" max="50" value="0" onchange="color_change()" style="vertical-align : top;">
 				</li>
 				<li>
-					C:<input id="contrast" name="contrast" type="range" min="-50" max="50" value="0" onchange="color_change()" style="vertical-align : top;">
+					<span class="input_index">C</span>
+					<input id="contrast" name="contrast" type="range" min="-50" max="50" value="0" onchange="color_change()" style="vertical-align : top;">
 				</li>
 			</ul>
 			<ul>
 				<li>
-					R:<input id="layer_R" name="layer_R" type="range" min="-50" max="50" value="0" onchange="color_change()" style="vertical-align : top;">
+					<span class="input_index">R</span>
+					<input id="layer_R" name="layer_R" type="range" min="-50" max="50" value="0" onchange="color_change()" style="vertical-align : top;">
 				</li>
 				<li>
-					G:<input id="layer_G" name="layer_G" type="range" min="-50" max="50" value="0" onchange="color_change()" style="vertical-align : top;">
+					<span class="input_index">G</span>
+					<input id="layer_G" name="layer_G" type="range" min="-50" max="50" value="0" onchange="color_change()" style="vertical-align : top;">
 				</li>
 				<li>
-					B:<input id="layer_B" name="layer_B" type="range" min="-50" max="50" value="0" onchange="color_change()" style="vertical-align : top;">
+					<span class="input_index">B</span>
+					<input id="layer_B" name="layer_B" type="range" min="-50" max="50" value="0" onchange="color_change()" style="vertical-align : top;">
 				</li>
 			</ul>
 			<section class="progress">
@@ -60,7 +64,8 @@
 			Lens blur
 			<ul title = "Lens blur">
 				<li>
-					amount:<input id="blur" name="blur" type="range" min="0" max="10" value="0" onchange="image_blur()" style="vertical-align : top;">
+					<span class="input_index">amount</span>
+					<input id="blur" name="blur" type="range" min="0" max="10" value="0" onchange="image_blur()" style="vertical-align : top;">
 				</li>
 			</ul>		
 			<section class="progress">
@@ -92,15 +97,15 @@
 			</li>
 		</ul>
 	</menu>
-	
+
 <script type="text/javascript">
 var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
 document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
 </script>
 <script type="text/javascript">
+try {
 var pageTracker = _gat._getTracker("UA-827260-7");
-pageTracker._initData();
 pageTracker._trackPageview();
-</script>
+} catch(err) {}</script>
 </body>
 </html>
